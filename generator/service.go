@@ -447,16 +447,16 @@ func (this *`, sName, `_`, camelQ(q), `Query) Execute(x `, sName, `_`, camelQ(q)
 						)
 					} else if label == desc.FieldDescriptorProto_LABEL_REPEATED && fieldType == desc.FieldDescriptorProto_TYPE_MESSAGE {
 						result = append(result, `
-							`+key+` := make([][]byte, 0)
-							for _, tmp := range x.Get`+_gen.CamelCase(key)+`() {
-								bytes, err := proto.Marshal(tmp)
-								if err != nil {
-									return nil, err
-								}
-								`+key+` = append(`+key+`, bytes)
-							}
-							result["`+key+`"] = `+key+`
-						`)
+                            `+key+` := make([][]byte, 0)
+                            for _, tmp := range x.Get`+_gen.CamelCase(key)+`() {
+                                bytes, err := proto.Marshal(tmp)
+                                if err != nil {
+                                    return nil, err
+                                }
+                                `+key+` = append(`+key+`, bytes)
+                            }
+                            result["`+key+`"] = `+key+`
+                        `)
 					} else if fieldType == desc.FieldDescriptorProto_TYPE_MESSAGE {
 						result = append(result, `
                         `+key+`, err := proto.Marshal(x.Get`+_gen.CamelCase(key)+`())
@@ -1267,14 +1267,14 @@ func WriteRows(p *Printer, s *Service) (outErr error) {
 		did := make(map[string]bool)
 
 		printer.Q(`func (this *`, sName, `_`, camelQ(q), `Row) `, outNamePkg(q), `() (*`, outName(q), `, error) {
-			if this.err != nil {
-				return nil, this.err
-			}
-			return &`, outName(q), `{
-				`, setQueryOutFields(q), `
-			}, nil
-		}
-		`)
+            if this.err != nil {
+                return nil, this.err
+            }
+            return &`, outName(q), `{
+                `, setQueryOutFields(q), `
+            }, nil
+        }
+        `)
 		did[outName(q)] = true
 
 		m.EachMethod(func(mopt *MethodProtoOpts) {
@@ -1398,7 +1398,7 @@ func (this *`, serviceName, `_Impl) `, method, `(req *`, inMsg, `, stream `, ser
 
 		if m.ClientStreaming(mpo) {
 			p.Q(`
-func (this *`, serviceName, `_Impl) `, method, `(stream `, serviceName, `_`, inMsg, `Server) error {
+func (this *`, serviceName, `_Impl) `, method, `(stream `, serviceName, `_`, method, `Server) error {
     return this.HANDLERS.`, method, `(stream)
 }
         `)

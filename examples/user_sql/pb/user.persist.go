@@ -778,7 +778,7 @@ func (this *UServ_GetAllUsersIter) Next() (*UServ_GetAllUsersRow, bool) {
 			}
 			res.Friends = converted
 		case "created_on":
-			var converted = this.tm.TimestampTimestamp().Empty()
+			var converted = this.tm.TimestampTimestamp()
 			if err := converted.Scan(*scanned[i].i); err != nil {
 				return &UServ_GetAllUsersRow{err: fmt.Errorf("could not convert mapped db column created_on to type on User.CreatedOn: %v", err)}, true
 			}
@@ -929,7 +929,7 @@ func (this *UServ_SelectUserByIdIter) Next() (*UServ_SelectUserByIdRow, bool) {
 			}
 			res.Friends = converted
 		case "created_on":
-			var converted = this.tm.TimestampTimestamp().Empty()
+			var converted = this.tm.TimestampTimestamp()
 			if err := converted.Scan(*scanned[i].i); err != nil {
 				return &UServ_SelectUserByIdRow{err: fmt.Errorf("could not convert mapped db column created_on to type on User.CreatedOn: %v", err)}, true
 			}
@@ -1080,7 +1080,7 @@ func (this *UServ_UpdateUserNameIter) Next() (*UServ_UpdateUserNameRow, bool) {
 			}
 			res.Friends = converted
 		case "created_on":
-			var converted = this.tm.TimestampTimestamp().Empty()
+			var converted = this.tm.TimestampTimestamp()
 			if err := converted.Scan(*scanned[i].i); err != nil {
 				return &UServ_UpdateUserNameRow{err: fmt.Errorf("could not convert mapped db column created_on to type on User.CreatedOn: %v", err)}, true
 			}
@@ -1352,7 +1352,7 @@ func (this *UServ_GetFriendsIter) Next() (*UServ_GetFriendsRow, bool) {
 			}
 			res.Friends = converted
 		case "created_on":
-			var converted = this.tm.TimestampTimestamp().Empty()
+			var converted = this.tm.TimestampTimestamp()
 			if err := converted.Scan(*scanned[i].i); err != nil {
 				return &UServ_GetFriendsRow{err: fmt.Errorf("could not convert mapped db column created_on to type on User.CreatedOn: %v", err)}, true
 			}
@@ -1982,7 +1982,8 @@ type UServ_TypeMappings interface {
 	TimestampTimestamp() UServTimestampTimestampMappingImpl
 	SliceStringParam() UServSliceStringParamMappingImpl
 }
-type UServ_DefaultTypeMappings struct{}
+
+type DefaultTypeMappings_UServ struct{}
 
 func (this *UServ_DefaultTypeMappings) TimestampTimestamp() UServTimestampTimestampMappingImpl {
 	return &UServ_DefaultTimestampTimestampMappingImpl{}

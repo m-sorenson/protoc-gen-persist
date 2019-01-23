@@ -2136,11 +2136,13 @@ func (this *UServ_Impl) InsertUsersTx(stream UServ_InsertUsersServer, tx Persist
 			first = req
 		}
 
-		beforeRes, err := this.opts.HOOKS.InsertUsersBeforeHook(stream.Context(), req)
-		if err != nil {
-			return gstatus.Errorf(codes.Unknown, "error in before hook: %v", err)
-		} else if beforeRes != nil {
-			continue
+		{
+			beforeRes, err := this.opts.HOOKS.InsertUsersBeforeHook(stream.Context(), req)
+			if err != nil {
+				return gstatus.Errorf(codes.Unknown, "error in before hook: %v", err)
+			} else if beforeRes != nil {
+				continue
+			}
 		}
 
 		result := query.Execute(req)
@@ -2155,8 +2157,10 @@ func (this *UServ_Impl) InsertUsersTx(stream UServ_InsertUsersServer, tx Persist
 	}
 	res := &Empty{}
 
-	if err := this.opts.HOOKS.InsertUsersAfterHook(stream.Context(), first, res); err != nil {
-		return gstatus.Errorf(codes.Unknown, "error in after hook: %v", err)
+	{
+		if err := this.opts.HOOKS.InsertUsersAfterHook(stream.Context(), first, res); err != nil {
+			return gstatus.Errorf(codes.Unknown, "error in after hook: %v", err)
+		}
 	}
 
 	if err := stream.SendAndClose(res); err != nil {

@@ -890,7 +890,7 @@ func WriteIters(p *Printer, s *Service) (outErr error) {
 
         // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
         func (this *Iter_`, sName, `_`, camelQ(q), `) Next() (*Row_`, sName, `_`, camelQ(q), `, bool) {
-            if this.rows == nil || this.err == io.EOF {
+            if this.rows == nil && this.err == io.EOF {
                 return nil, false
             } else if this.err != nil {
                 err := this.err

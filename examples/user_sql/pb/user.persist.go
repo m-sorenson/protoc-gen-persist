@@ -11,23 +11,18 @@ import (
 
 	proto "github.com/golang/protobuf/proto"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	persist "github.com/tcncloud/protoc-gen-persist/persist"
 	context "golang.org/x/net/context"
 	codes "google.golang.org/grpc/codes"
 	gstatus "google.golang.org/grpc/status"
 )
 
-type PersistTx interface {
-	Commit() error
-	Rollback() error
-	Runnable
-}
-
-func NopPersistTx(r Runnable) (PersistTx, error) {
+func NopPersistTx(r persist.Runnable) (persist.PersistTx, error) {
 	return &ignoreTx{r}, nil
 }
 
 type ignoreTx struct {
-	r Runnable
+	r persist.Runnable
 }
 
 func (this *ignoreTx) Commit() error   { return nil }
@@ -44,16 +39,16 @@ type Runnable interface {
 	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 }
 
-func DefaultClientStreamingPersistTx(ctx context.Context, db *sql.DB) (PersistTx, error) {
+func DefaultClientStreamingPersistTx(ctx context.Context, db *sql.DB) (persist.PersistTx, error) {
 	return db.BeginTx(ctx, nil)
 }
-func DefaultServerStreamingPersistTx(ctx context.Context, db *sql.DB) (PersistTx, error) {
+func DefaultServerStreamingPersistTx(ctx context.Context, db *sql.DB) (persist.PersistTx, error) {
 	return NopPersistTx(db)
 }
-func DefaultBidiStreamingPersistTx(ctx context.Context, db *sql.DB) (PersistTx, error) {
+func DefaultBidiStreamingPersistTx(ctx context.Context, db *sql.DB) (persist.PersistTx, error) {
 	return NopPersistTx(db)
 }
-func DefaultUnaryPersistTx(ctx context.Context, db *sql.DB) (PersistTx, error) {
+func DefaultUnaryPersistTx(ctx context.Context, db *sql.DB) (persist.PersistTx, error) {
 	return NopPersistTx(db)
 }
 
@@ -93,7 +88,7 @@ func QueriesUServ(opts ...Opts_UServ) *Queries_UServ {
 // CreateUsersTable returns a struct that will perform the 'create_users_table' query.
 // When Execute is called, it will use the following fields:
 // []
-func (this *Queries_UServ) CreateUsersTable(ctx context.Context, db Runnable) *Query_UServ_CreateUsersTable {
+func (this *Queries_UServ) CreateUsersTable(ctx context.Context, db persist.Runnable) *Query_UServ_CreateUsersTable {
 	return &Query_UServ_CreateUsersTable{
 		opts: this.opts,
 		ctx:  ctx,
@@ -104,7 +99,7 @@ func (this *Queries_UServ) CreateUsersTable(ctx context.Context, db Runnable) *Q
 // Query_UServ_CreateUsersTable (future doc string needed)
 type Query_UServ_CreateUsersTable struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -131,7 +126,7 @@ func (this *Query_UServ_CreateUsersTable) Execute(x In_UServ_CreateUsersTable) *
 // InsertUsers returns a struct that will perform the 'insert_users' query.
 // When Execute is called, it will use the following fields:
 // [id name friends created_on]
-func (this *Queries_UServ) InsertUsers(ctx context.Context, db Runnable) *Query_UServ_InsertUsers {
+func (this *Queries_UServ) InsertUsers(ctx context.Context, db persist.Runnable) *Query_UServ_InsertUsers {
 	return &Query_UServ_InsertUsers{
 		opts: this.opts,
 		ctx:  ctx,
@@ -142,7 +137,7 @@ func (this *Queries_UServ) InsertUsers(ctx context.Context, db Runnable) *Query_
 // Query_UServ_InsertUsers (future doc string needed)
 type Query_UServ_InsertUsers struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -191,7 +186,7 @@ func (this *Query_UServ_InsertUsers) Execute(x In_UServ_InsertUsers) *Iter_UServ
 // GetAllUsers returns a struct that will perform the 'get_all_users' query.
 // When Execute is called, it will use the following fields:
 // []
-func (this *Queries_UServ) GetAllUsers(ctx context.Context, db Runnable) *Query_UServ_GetAllUsers {
+func (this *Queries_UServ) GetAllUsers(ctx context.Context, db persist.Runnable) *Query_UServ_GetAllUsers {
 	return &Query_UServ_GetAllUsers{
 		opts: this.opts,
 		ctx:  ctx,
@@ -202,7 +197,7 @@ func (this *Queries_UServ) GetAllUsers(ctx context.Context, db Runnable) *Query_
 // Query_UServ_GetAllUsers (future doc string needed)
 type Query_UServ_GetAllUsers struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -229,7 +224,7 @@ func (this *Query_UServ_GetAllUsers) Execute(x In_UServ_GetAllUsers) *Iter_UServ
 // SelectUserById returns a struct that will perform the 'select_user_by_id' query.
 // When Execute is called, it will use the following fields:
 // [id]
-func (this *Queries_UServ) SelectUserById(ctx context.Context, db Runnable) *Query_UServ_SelectUserById {
+func (this *Queries_UServ) SelectUserById(ctx context.Context, db persist.Runnable) *Query_UServ_SelectUserById {
 	return &Query_UServ_SelectUserById{
 		opts: this.opts,
 		ctx:  ctx,
@@ -240,7 +235,7 @@ func (this *Queries_UServ) SelectUserById(ctx context.Context, db Runnable) *Que
 // Query_UServ_SelectUserById (future doc string needed)
 type Query_UServ_SelectUserById struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -272,7 +267,7 @@ func (this *Query_UServ_SelectUserById) Execute(x In_UServ_SelectUserById) *Iter
 // UpdateUserName returns a struct that will perform the 'update_user_name' query.
 // When Execute is called, it will use the following fields:
 // [name id]
-func (this *Queries_UServ) UpdateUserName(ctx context.Context, db Runnable) *Query_UServ_UpdateUserName {
+func (this *Queries_UServ) UpdateUserName(ctx context.Context, db persist.Runnable) *Query_UServ_UpdateUserName {
 	return &Query_UServ_UpdateUserName{
 		opts: this.opts,
 		ctx:  ctx,
@@ -283,7 +278,7 @@ func (this *Queries_UServ) UpdateUserName(ctx context.Context, db Runnable) *Que
 // Query_UServ_UpdateUserName (future doc string needed)
 type Query_UServ_UpdateUserName struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -319,7 +314,7 @@ func (this *Query_UServ_UpdateUserName) Execute(x In_UServ_UpdateUserName) *Iter
 // UpdateNameToFoo returns a struct that will perform the 'update_name_to_foo' query.
 // When Execute is called, it will use the following fields:
 // [id]
-func (this *Queries_UServ) UpdateNameToFoo(ctx context.Context, db Runnable) *Query_UServ_UpdateNameToFoo {
+func (this *Queries_UServ) UpdateNameToFoo(ctx context.Context, db persist.Runnable) *Query_UServ_UpdateNameToFoo {
 	return &Query_UServ_UpdateNameToFoo{
 		opts: this.opts,
 		ctx:  ctx,
@@ -330,7 +325,7 @@ func (this *Queries_UServ) UpdateNameToFoo(ctx context.Context, db Runnable) *Qu
 // Query_UServ_UpdateNameToFoo (future doc string needed)
 type Query_UServ_UpdateNameToFoo struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -362,7 +357,7 @@ func (this *Query_UServ_UpdateNameToFoo) Execute(x In_UServ_UpdateNameToFoo) *It
 // GetFriends returns a struct that will perform the 'get_friends' query.
 // When Execute is called, it will use the following fields:
 // [names]
-func (this *Queries_UServ) GetFriends(ctx context.Context, db Runnable) *Query_UServ_GetFriends {
+func (this *Queries_UServ) GetFriends(ctx context.Context, db persist.Runnable) *Query_UServ_GetFriends {
 	return &Query_UServ_GetFriends{
 		opts: this.opts,
 		ctx:  ctx,
@@ -373,7 +368,7 @@ func (this *Queries_UServ) GetFriends(ctx context.Context, db Runnable) *Query_U
 // Query_UServ_GetFriends (future doc string needed)
 type Query_UServ_GetFriends struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -406,7 +401,7 @@ func (this *Query_UServ_GetFriends) Execute(x In_UServ_GetFriends) *Iter_UServ_G
 // Drop returns a struct that will perform the 'drop' query.
 // When Execute is called, it will use the following fields:
 // []
-func (this *Queries_UServ) Drop(ctx context.Context, db Runnable) *Query_UServ_Drop {
+func (this *Queries_UServ) Drop(ctx context.Context, db persist.Runnable) *Query_UServ_Drop {
 	return &Query_UServ_Drop{
 		opts: this.opts,
 		ctx:  ctx,
@@ -417,7 +412,7 @@ func (this *Queries_UServ) Drop(ctx context.Context, db Runnable) *Query_UServ_D
 // Query_UServ_Drop (future doc string needed)
 type Query_UServ_Drop struct {
 	opts Opts_UServ
-	db   Runnable
+	db   persist.Runnable
 	ctx  context.Context
 }
 
@@ -490,7 +485,7 @@ func (this *Iter_UServ_CreateUsersTable) One() *Row_UServ_CreateUsersTable {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_CreateUsersTable) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -501,12 +496,14 @@ func (this *Iter_UServ_CreateUsersTable) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_CreateUsersTable) Next() (*Row_UServ_CreateUsersTable, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_CreateUsersTable{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -611,7 +608,7 @@ func (this *Iter_UServ_InsertUsers) One() *Row_UServ_InsertUsers {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_InsertUsers) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -622,12 +619,14 @@ func (this *Iter_UServ_InsertUsers) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_InsertUsers) Next() (*Row_UServ_InsertUsers, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_InsertUsers{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -732,7 +731,7 @@ func (this *Iter_UServ_GetAllUsers) One() *Row_UServ_GetAllUsers {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_GetAllUsers) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -743,12 +742,14 @@ func (this *Iter_UServ_GetAllUsers) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_GetAllUsers) Next() (*Row_UServ_GetAllUsers, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_GetAllUsers{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -883,7 +884,7 @@ func (this *Iter_UServ_SelectUserById) One() *Row_UServ_SelectUserById {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_SelectUserById) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -894,12 +895,14 @@ func (this *Iter_UServ_SelectUserById) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_SelectUserById) Next() (*Row_UServ_SelectUserById, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_SelectUserById{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -1034,7 +1037,7 @@ func (this *Iter_UServ_UpdateUserName) One() *Row_UServ_UpdateUserName {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_UpdateUserName) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -1045,12 +1048,14 @@ func (this *Iter_UServ_UpdateUserName) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_UpdateUserName) Next() (*Row_UServ_UpdateUserName, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_UpdateUserName{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -1185,7 +1190,7 @@ func (this *Iter_UServ_UpdateNameToFoo) One() *Row_UServ_UpdateNameToFoo {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_UpdateNameToFoo) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -1196,12 +1201,14 @@ func (this *Iter_UServ_UpdateNameToFoo) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_UpdateNameToFoo) Next() (*Row_UServ_UpdateNameToFoo, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_UpdateNameToFoo{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -1306,7 +1313,7 @@ func (this *Iter_UServ_GetFriends) One() *Row_UServ_GetFriends {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_GetFriends) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -1317,12 +1324,14 @@ func (this *Iter_UServ_GetFriends) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_GetFriends) Next() (*Row_UServ_GetFriends, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_GetFriends{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -1457,7 +1466,7 @@ func (this *Iter_UServ_Drop) One() *Row_UServ_Drop {
 // Zero returns an error if there were any rows in the result
 func (this *Iter_UServ_Drop) Zero() error {
 	row, ok := this.Next()
-	if row != nil && row.err != nil {
+	if row != nil && row.err != nil && row.err != io.EOF {
 		return row.err
 	}
 	if ok {
@@ -1468,12 +1477,14 @@ func (this *Iter_UServ_Drop) Zero() error {
 
 // Next returns the next scanned row out of the database, or (nil, false) if there are no more rows
 func (this *Iter_UServ_Drop) Next() (*Row_UServ_Drop, bool) {
-	if this.rows == nil || this.err == io.EOF {
-		return nil, false
-	} else if this.err != nil {
+	if this.err != io.EOF && this.err != nil {
 		err := this.err
 		this.err = io.EOF
 		return &Row_UServ_Drop{err: err}, true
+	}
+	if this.rows == nil {
+		this.err = io.EOF
+		return nil, false
 	}
 	cols, err := this.rows.Columns()
 	if err != nil {
@@ -2231,7 +2242,7 @@ func (this *Impl_UServ) InsertUsers(stream UServ_InsertUsersServer) error {
 	}
 	return nil
 }
-func (this *Impl_UServ) InsertUsersTx(stream UServ_InsertUsersServer, tx PersistTx) error {
+func (this *Impl_UServ) InsertUsersTx(stream UServ_InsertUsersServer, tx persist.PersistTx) error {
 	query := this.QUERIES.InsertUsers(stream.Context(), tx)
 	var first *User
 	for {
@@ -2288,7 +2299,7 @@ func (this *Impl_UServ) GetAllUsers(req *Empty, stream UServ_GetAllUsersServer) 
 	}
 	return nil
 }
-func (this *Impl_UServ) GetAllUsersTx(req *Empty, stream UServ_GetAllUsersServer, tx PersistTx) error {
+func (this *Impl_UServ) GetAllUsersTx(req *Empty, stream UServ_GetAllUsersServer, tx persist.PersistTx) error {
 	ctx := stream.Context()
 	query := this.QUERIES.GetAllUsers(ctx, tx)
 	iter := query.Execute(req)
@@ -2338,7 +2349,7 @@ func (this *Impl_UServ) GetFriends(req *FriendsReq, stream UServ_GetFriendsServe
 	}
 	return nil
 }
-func (this *Impl_UServ) GetFriendsTx(req *FriendsReq, stream UServ_GetFriendsServer, tx PersistTx) error {
+func (this *Impl_UServ) GetFriendsTx(req *FriendsReq, stream UServ_GetFriendsServer, tx persist.PersistTx) error {
 	ctx := stream.Context()
 	query := this.QUERIES.GetFriends(ctx, tx)
 	iter := query.Execute(req)
